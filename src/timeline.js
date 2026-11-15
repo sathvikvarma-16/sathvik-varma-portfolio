@@ -1,16 +1,21 @@
 import * as THREE from 'three';
 import { clamp, smooth } from './store.js';
+import { PROJECTS } from './content.js';
 
 /* World layout — every room lives somewhere along -Z */
 export const FLOOR = -2.2;
+const addedProjectDepth = Math.max(0, PROJECTS.length - 4) * 14;
 export const L = {
   gate: new THREE.Vector3(0, 1, -34),
-  m: [new THREE.Vector3(-1.9, 0, -62), new THREE.Vector3(1.9, 0, -80), new THREE.Vector3(-1.9, 0, -98)],
-  skills: new THREE.Vector3(0, 1, -128),
-  towers: -160,
-  arches: [-185, -200, -215],
-  certs: new THREE.Vector3(0, 0.55, -245),
-  moon: new THREE.Vector3(0, 3.5, -330),
+  m: Array.from(
+    { length: PROJECTS.length },
+    (_, i) => new THREE.Vector3(i % 2 === 0 ? -1.9 : 1.9, 0, -62 - i * 14)
+  ),
+  skills: new THREE.Vector3(0, 1, -128 - addedProjectDepth),
+  towers: -160 - addedProjectDepth,
+  arches: [-185, -198, -211, -224].map((z) => z - addedProjectDepth),
+  certs: new THREE.Vector3(0, 0.55, -245 - addedProjectDepth),
+  moon: new THREE.Vector3(0, 3.5, -330 - addedProjectDepth),
 };
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -27,17 +32,17 @@ export function buildTimeline(mobile) {
     else add(`work${i}`, V(side * 3.4, 0.5, m.z + 7.5), V(m.x + side * 2.1, m.y + 0.6, m.z), 1, 1.05, V(-side * 0.4, 0, -0.7));
   });
   S[S.length - 1].travel = 1.6;
-  if (mobile) add('skills', V(0, 1, -110.5), V(0, -1.5, -128), 1.4, 1.4);
-  else add('skills', V(0, 1, -114.5), V(-2.5, 1, -128), 1.4, 1.4);
-  if (mobile) add('numbers', V(0, 2.2, -143), V(0, 0.6, -160), 1.1, 1.5);
-  else add('numbers', V(0, 1.7, -145), V(0, 2.3, -160), 1.1, 1.5);
+  if (mobile) add('skills', V(0, 1, -110.5 - addedProjectDepth), V(0, -1.5, -128 - addedProjectDepth), 1.4, 1.4);
+  else add('skills', V(0, 1, -114.5 - addedProjectDepth), V(-2.5, 1, -128 - addedProjectDepth), 1.4, 1.4);
+  if (mobile) add('numbers', V(0, 2.2, -143 - addedProjectDepth), V(0, 0.6, -160 - addedProjectDepth), 1.1, 1.5);
+  else add('numbers', V(0, 1.7, -145 - addedProjectDepth), V(0, 2.3, -160 - addedProjectDepth), 1.1, 1.5);
   L.arches.forEach((z, i) => {
-    if (mobile) add(`journey${i}`, V(0, 0.5, z + 9.5), V(0, -0.9, z - 12), 0.85, i === 2 ? 1.4 : 1.0, V(0, 0, -1.2));
-    else add(`journey${i}`, V(0, 0.5, z + 8.8), V(-2.1, 0.7, z - 12), 0.85, i === 2 ? 1.4 : 1.0, V(0, 0, -1.2));
+    if (mobile) add(`journey${i}`, V(0, 0.5, z + 9.5), V(0, -0.9, z - 12), 0.85, i === L.arches.length - 1 ? 1.4 : 1.0, V(0, 0, -1.2));
+    else add(`journey${i}`, V(0, 0.5, z + 8.8), V(-2.1, 0.7, z - 12), 0.85, i === L.arches.length - 1 ? 1.4 : 1.0, V(0, 0, -1.2));
   });
-  add('certs', V(0, 1.8, mobile ? -228.5 : -232), V(0, mobile ? 2.6 : 2.15, -245), 1.3, 1.7, V(0, 0, -0.6));
-  if (mobile) add('contact', V(0, 0.6, -262), V(0, 3.6, -300), 1.1, 0, V(0, 0.3, -2.2));
-  else add('contact', V(0, 0.6, -262), V(2.5, 2.6, -300), 1.1, 0, V(0, 0.3, -2.2));
+  add('certs', V(0, 1.8, (mobile ? -228.5 : -232) - addedProjectDepth), V(0, mobile ? 2.6 : 2.15, -245 - addedProjectDepth), 1.3, 1.7, V(0, 0, -0.6));
+  if (mobile) add('contact', V(0, 0.6, -262 - addedProjectDepth), V(0, 3.6, -300 - addedProjectDepth), 1.1, 0, V(0, 0.3, -2.2));
+  else add('contact', V(0, 0.6, -262 - addedProjectDepth), V(2.5, 2.6, -300 - addedProjectDepth), 1.1, 0, V(0, 0.3, -2.2));
 
   // normalise into 0..1 segments
   let acc = 0;

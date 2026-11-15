@@ -124,7 +124,7 @@ html.has-cursor * {
   inset: 0 0 auto 0;
   z-index: 50;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding: 1.8rem var(--pad);
   opacity: 0;
@@ -138,19 +138,6 @@ html.has-cursor * {
 }
 .nav.show > * {
   pointer-events: auto;
-}
-.nav-mark {
-  background: none;
-  border: 0;
-  padding: 0;
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 2.1rem;
-  line-height: 1;
-}
-.nav-mark span {
-  font-style: normal;
-  color: #777;
 }
 .nav-links {
   display: flex;
@@ -256,35 +243,18 @@ html.has-cursor * {
 }
 .lead {
   margin: 0;
-  max-width: 1100px;
+  max-width: 900px;
   font-weight: 300;
-  font-size: clamp(1.9rem, 4.2vw, 4.4rem);
-  line-height: 1.08;
-  letter-spacing: -0.035em;
+  font-size: clamp(1.35rem, 2.25vw, 2.1rem);
+  line-height: 1.45;
+  letter-spacing: -0.02em;
   text-shadow: 0 2px 40px rgba(0, 0, 0, 0.8);
 }
-.stats {
-  display: flex;
-  gap: clamp(2rem, 6vw, 6rem);
-  margin-top: 3.4rem;
+.lead p {
+  margin: 0;
 }
-.stats > div {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 1s var(--ease) 0.6s, transform 1s var(--ease) 0.6s;
-}
-.pnl.on .stats > div {
-  opacity: 1;
-  transform: none;
-}
-.stats b {
-  font-weight: 300;
-  font-size: clamp(2.2rem, 3.6vw, 3.6rem);
-  letter-spacing: -0.04em;
-  line-height: 1;
+.lead p + p {
+  margin-top: 1.15rem;
 }
 
 /* work */
@@ -325,6 +295,25 @@ html.has-cursor * {
   opacity: 0;
   transform: translateY(16px);
   transition: opacity 1s var(--ease) 0.2s, transform 1s var(--ease) 0.2s;
+}
+.project-link {
+  display: inline-block;
+  margin-top: 1.2rem;
+  color: #e8e8ea;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease), color 0.3s;
+}
+.project-link:hover {
+  color: #fff;
+}
+.pnl.on .project-link {
+  opacity: 1;
+  transform: none;
 }
 .pnl.on .wc-desc {
   opacity: 1;
@@ -440,6 +429,16 @@ html.has-cursor * {
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
+  width: min(190px, 30vw);
+  white-space: normal;
+  text-align: center;
+}
+.tw-detail {
+  color: #a2a2a8;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  letter-spacing: 0;
 }
 .tw-val {
   font-weight: 300;
@@ -553,6 +552,15 @@ html.has-cursor * {
   gap: 1rem;
   text-align: center;
 }
+.cert-note {
+  color: var(--mute);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+.cert-note {
+  margin: 0;
+}
 
 /* contact */
 .pnl-contact {
@@ -616,6 +624,7 @@ html.has-cursor * {
   backdrop-filter: blur(8px);
   color: #e8e8ea;
   transition: background 0.45s var(--ease), color 0.45s, border-color 0.45s, transform 0.5s var(--ease);
+  text-decoration: none;
 }
 .soc svg {
   width: 36%;
@@ -640,6 +649,8 @@ html.has-cursor * {
   font-size: 1.05rem;
   font-weight: 500;
   transition: transform 0.5s var(--ease);
+  color: inherit;
+  text-decoration: none;
 }
 .resume-ic {
   position: relative;
@@ -700,6 +711,16 @@ html.has-cursor * {
   padding-top: 1.4rem;
   border-top: 1px solid var(--line);
 }
+.contact-note {
+  display: block;
+  max-width: 680px;
+  margin-top: 1.2rem;
+  color: var(--mute);
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  letter-spacing: 0;
+}
 
 /* ---------- mobile ---------- */
 @media (max-width: 760px) {
@@ -724,14 +745,18 @@ html.has-cursor * {
   .pnl-about {
     justify-content: center;
   }
-  .stats {
-    gap: 1.6rem;
+  .lead {
+    font-size: clamp(1.2rem, 4vw, 1.55rem);
+    line-height: 1.4;
   }
-  .stats b {
-    font-size: 1.8rem;
+  .lead p + p {
+    margin-top: 0.85rem;
   }
-  .stats .mono {
-    font-size: 9px;
+  .tw-label {
+    width: 28vw;
+  }
+  .tw-detail {
+    font-size: 0.72rem;
   }
   .pnl-work,
   .pnl-work.side-right {

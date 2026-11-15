@@ -5,7 +5,7 @@ import { L, FLOOR, vis, local } from '../timeline.js';
 import { store, clamp, easeOut } from '../store.js';
 import { STATS } from '../content.js';
 
-const X = [-4.5, -1.5, 1.5, 4.5];
+const X = [-3.6, 0, 3.6];
 
 export default function Towers() {
   const { size } = useThree();
@@ -49,8 +49,8 @@ export default function Towers() {
         el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -100%)`;
         el.style.opacity = v.z > 1 ? '0' : String(sv * clamp(k * 1.4));
         const num = el.querySelector('.tw-num');
-        const val = Math.round(st.value * k);
-        if (num && num.textContent !== String(val)) num.textContent = String(val);
+        const val = (st.value * k).toFixed(st.decimals);
+        if (num && num.textContent !== val) num.textContent = val;
       }
     });
   });

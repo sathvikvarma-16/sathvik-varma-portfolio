@@ -2,11 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
-import portraitUrl from '../assets/lohitha.webp';
+import portraitAsset from '../assets/sathvik-portrait.png';
+import { PORTRAIT_URL } from '../content.js';
 import { store, clamp, lerp, ease, easeOut } from '../store.js';
 import { sampleWord, measure, glowTexture } from './textures.js';
 
-/* ---------------- Particle word: LOHITHA → PORTFOLIO ---------------- */
+/* ---------------- Particle word: SATHVIK VARMA → MACHINE LEARNING ---------------- */
 const pointsVert = /* glsl */ `
 attribute vec3 aA;
 attribute vec3 aB;
@@ -120,7 +121,7 @@ const wordRatio = { v: 0.78 };
 export default function Hero() {
   const { size, camera, gl } = useThree();
   const [data, setData] = useState(null);
-  const tex = useTexture(portraitUrl);
+  const tex = useTexture(PORTRAIT_URL || portraitAsset);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
 
@@ -138,10 +139,10 @@ export default function Hero() {
     Promise.race([Promise.all([document.fonts.load(font), document.fonts.load('400 40px "Instrument Serif"'), document.fonts.load('500 20px "JetBrains Mono"')]), timeout]).then(() => {
       if (!alive) return;
       const N = store.mobile ? 9000 : 22000;
-      const norm = measure('PORTFOLIO', font);
-      const A = sampleWord('PORTFOLIO', N, norm, font);
-      const B = sampleWord('LOHITHA', N, norm, font);
-      wordRatio.v = measure('LOHITHA', font) / norm;
+      const norm = Math.max(measure('SATHVIK VARMA', font), measure('MACHINE LEARNING', font));
+      const A = sampleWord('SATHVIK VARMA', N, norm, font);
+      const B = sampleWord('MACHINE LEARNING', N, norm, font);
+      wordRatio.v = measure('MACHINE LEARNING', font) / norm;
       const R = new Float32Array(N * 3);
       const rnd = new Float32Array(N);
       for (let i = 0; i < N; i++) {
@@ -226,7 +227,7 @@ export default function Hero() {
     };
   }, [size, camera.fov]);
 
-  // animated smoke veils, one in front of her and one behind
+  // animated smoke veils, one in front of the portrait and one behind
   const veils = useMemo(
     () =>
       [0.0, 3.7].map(
@@ -296,7 +297,7 @@ export default function Hero() {
     portrait.current.position.y = lay.py + Math.sin(time * 0.6) * 0.02;
     halo.current.material.opacity = 0.16 * ease(reveal) * (1 - clamp(exit * 2.4));
 
-    // smoke: billows in as she forms, settles to her feet, swallows her again on scroll
+    // smoke: billows in as the portrait forms, settles to the floor, then swallows it on scroll
     const burst = Math.sin(clamp(exit * 2.0) * Math.PI) * (1 - clamp(exit * 1.6 - 0.6));
     const amount = smokeIn * 0.95 - smokeOut * 0.8 + burst * 0.9;
     const low = clamp(smokeOut - burst * 1.4);

@@ -3,158 +3,88 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { L, FLOOR } from '../timeline.js';
 import { store } from '../store.js';
+import { PROJECTS } from '../content.js';
 
 const SW = 512;
 const SH = 900;
-const RES = 1.6; // supersampled screens
+const RES = 1.6;
 
-function drawPolicy(g, t) {
+function drawProject(g, t, project, index) {
   g.fillStyle = '#0b0b0c';
   g.fillRect(0, 0, SW, SH);
-  g.font = '500 18px "JetBrains Mono"';
-  g.fillStyle = 'rgba(255,255,255,.45)';
-  g.fillText('POLICY  SCAN', 48, 70);
-  g.fillText('● LIVE', SW - 130, 70);
-  // document
-  const dx = 48, dy = 110, dw = SW - 96, dh = 520;
-  g.fillStyle = '#121214';
-  g.fillRect(dx, dy, dw, dh);
-  g.strokeStyle = 'rgba(255,255,255,.1)';
-  g.strokeRect(dx + 0.5, dy + 0.5, dw, dh);
-  const beam = dy + ((t * 0.28) % 1) * dh;
-  for (let i = 0; i < 15; i++) {
-    const y = dy + 40 + i * 31;
-    const w = (0.45 + ((i * 37) % 50) / 100) * (dw - 70);
-    const risk = i === 4 || i === 9 || i === 12;
-    const lit = Math.abs(y - beam) < 26;
-    g.fillStyle = risk ? (lit || (t * 2 + i) % 3 < 1.6 ? 'rgba(255,255,255,.95)' : 'rgba(255,255,255,.35)') : lit ? 'rgba(255,255,255,.4)' : 'rgba(255,255,255,.12)';
-    g.fillRect(dx + 35, y, w, 7);
-    if (risk) {
-      g.fillStyle = 'rgba(255,255,255,.9)';
-      g.beginPath();
-      g.arc(dx + 20, y + 3.5, 4, 0, Math.PI * 2);
-      g.fill();
-    }
-  }
-  const grd = g.createLinearGradient(0, beam - 70, 0, beam);
-  grd.addColorStop(0, 'rgba(255,255,255,0)');
-  grd.addColorStop(1, 'rgba(255,255,255,.14)');
-  g.fillStyle = grd;
-  g.fillRect(dx, Math.max(dy, beam - 70), dw, Math.min(70, beam - dy));
-  g.fillStyle = 'rgba(255,255,255,.9)';
-  g.fillRect(dx, beam, dw, 2);
-  // score ring
-  const cx = SW / 2, cy = 760, r = 74;
-  const v = 0.72 * (0.5 - 0.5 * Math.cos(Math.min(1, (t % 6) / 2.2) * Math.PI));
-  g.lineWidth = 8;
-  g.strokeStyle = 'rgba(255,255,255,.08)';
-  g.beginPath();
-  g.arc(cx, cy, r, 0, Math.PI * 2);
-  g.stroke();
-  g.strokeStyle = '#f2f2f4';
-  g.lineCap = 'round';
-  g.beginPath();
-  g.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + v * Math.PI * 2);
-  g.stroke();
-  g.fillStyle = '#fff';
-  g.font = '300 54px "Inter Tight"';
-  g.textAlign = 'center';
-  g.fillText(String(Math.round(v * 100)), cx, cy + 14);
-  g.font = '500 13px "JetBrains Mono"';
-  g.fillStyle = 'rgba(255,255,255,.45)';
-  g.fillText('RISK SCORE', cx, cy + 40);
-  g.textAlign = 'left';
-}
 
-function drawHeat(g, t) {
-  g.fillStyle = '#0b0b0c';
-  g.fillRect(0, 0, SW, SH);
-  g.font = '500 18px "JetBrains Mono"';
-  g.fillStyle = 'rgba(255,255,255,.45)';
-  g.fillText('RELEASE RISK', 48, 70);
-  g.fillText('v4.2', SW - 100, 70);
-  const cols = 9, rows = 15, pad = 48, gap = 6;
-  const cw = (SW - pad * 2 - gap * (cols - 1)) / cols;
-  for (let y = 0; y < rows; y++)
-    for (let x = 0; x < cols; x++) {
-      const w = (Math.sin(x * 0.7 + t * 0.9) + Math.cos(y * 0.45 - t * 0.7) + Math.sin((x + y) * 0.3 + t * 0.4)) / 3;
-      const v = Math.max(0, Math.min(1, 0.5 + w * 0.6 + Math.sin(x * 12.9 + y * 78.2) * 0.12));
-      g.fillStyle = `rgba(240,240,243,${0.05 + v * 0.85})`;
-      g.fillRect(pad + x * (cw + gap), 110 + y * (cw + gap), cw, cw);
-    }
-  const by = 110 + rows * (cw + gap) + 30;
-  const grd = g.createLinearGradient(pad, 0, SW - pad, 0);
-  grd.addColorStop(0, 'rgba(255,255,255,.05)');
-  grd.addColorStop(1, 'rgba(255,255,255,.95)');
-  g.fillStyle = grd;
-  g.fillRect(pad, by, SW - pad * 2, 6);
-  g.font = '500 13px "JetBrains Mono"';
-  g.fillStyle = 'rgba(255,255,255,.45)';
-  g.fillText('LOW', pad, by + 30);
+  const bg = g.createLinearGradient(0, 100, SW, SH);
+  bg.addColorStop(0, 'rgba(255,255,255,.07)');
+  bg.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = bg;
+  g.fillRect(0, 100, SW, SH - 100);
+
+  g.font = '500 16px "JetBrains Mono"';
+  g.fillStyle = 'rgba(255,255,255,.48)';
+  g.fillText('SATHVIK VARMA', 42, 62);
   g.textAlign = 'right';
-  g.fillText('HIGH', SW - pad, by + 30);
+  g.fillText(`PROJECT 0${index + 1}`, SW - 42, 62);
   g.textAlign = 'left';
-}
 
-function drawCloset(g, t) {
-  g.fillStyle = '#0b0b0c';
-  g.fillRect(0, 0, SW, SH);
-  g.font = '500 18px "JetBrains Mono"';
-  g.fillStyle = 'rgba(255,255,255,.45)';
-  g.fillText('AI  STYLIST', 48, 70);
-  const cx = SW / 2, cy = 420;
-  const rings = [
-    [190, 70, 0.4, 'OCCASION'],
-    [140, 120, -0.6, 'BUDGET'],
-    [215, 150, 1.2, 'STYLE'],
-  ];
-  rings.forEach(([rx, ry, rot, label], i) => {
-    g.save();
-    g.translate(cx, cy);
-    g.rotate(rot + t * 0.05 * (i % 2 ? -1 : 1));
-    g.strokeStyle = 'rgba(255,255,255,.22)';
-    g.lineWidth = 1.5;
-    g.beginPath();
-    g.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
-    g.stroke();
-    const a = t * (0.6 + i * 0.25) + i * 2;
-    const px = Math.cos(a) * rx, py = Math.sin(a) * ry;
-    const gr = g.createRadialGradient(px, py, 0, px, py, 22);
-    gr.addColorStop(0, 'rgba(255,255,255,1)');
-    gr.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = gr;
-    g.fillRect(px - 22, py - 22, 44, 44);
-    g.restore();
-    g.font = '500 13px "JetBrains Mono"';
-    g.fillStyle = 'rgba(255,255,255,.4)';
-    g.fillText(label, [60, 330, 70][i], [190, 660, 640][i]);
-  });
-  const s = 1 + Math.sin(t * 2) * 0.12;
-  g.save();
-  g.translate(cx, cy);
-  g.rotate(t * 0.3);
-  g.scale(s, s);
-  g.fillStyle = '#fff';
+  g.strokeStyle = 'rgba(255,255,255,.16)';
   g.beginPath();
-  for (let i = 0; i < 8; i++) {
-    const r = i % 2 ? 9 : 34;
-    const a = (i / 8) * Math.PI * 2;
-    g[i ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r);
+  g.moveTo(42, 92);
+  g.lineTo(SW - 42, 92);
+  g.stroke();
+
+  g.fillStyle = 'rgba(255,255,255,.5)';
+  g.font = '500 18px "JetBrains Mono"';
+  g.fillText(project.tag.toUpperCase(), 42, 160);
+  g.fillStyle = '#f4f4f6';
+  g.font = '400 52px "Instrument Serif"';
+  const words = project.title.split(' ');
+  let line = '';
+  let y = 247;
+  words.forEach((word) => {
+    const next = line ? `${line} ${word}` : word;
+    if (g.measureText(next).width > SW - 84 && line) {
+      g.fillText(line, 42, y);
+      y += 62;
+      line = word;
+    } else {
+      line = next;
+    }
+  });
+  if (line) g.fillText(line, 42, y);
+
+  const cx = SW / 2;
+  const cy = 525;
+  const phase = t * 0.7 + index * 1.3;
+  for (let ring = 0; ring < 4; ring++) {
+    g.beginPath();
+    g.ellipse(cx, cy, 70 + ring * 38, 42 + ring * 23, phase * (ring % 2 ? -0.08 : 0.08), 0, Math.PI * 2);
+    g.strokeStyle = `rgba(255,255,255,${0.1 + (ring === 0 ? 0.16 : 0)})`;
+    g.lineWidth = 1.5;
+    g.stroke();
   }
-  g.closePath();
-  g.fill();
-  g.restore();
-  g.font = '300 44px "Inter Tight"';
-  g.fillStyle = '#fff';
-  g.textAlign = 'center';
-  g.fillText('Head-to-toe', cx, 760);
-  g.font = 'italic 400 40px "Instrument Serif"';
-  g.fillStyle = 'rgba(255,255,255,.6)';
-  g.fillText('in one conversation', cx, 808);
+  for (let dot = 0; dot < 7; dot++) {
+    const angle = phase + (dot / 7) * Math.PI * 2;
+    const radius = 72 + (dot % 3) * 38;
+    const x = cx + Math.cos(angle) * radius;
+    const yy = cy + Math.sin(angle) * radius * 0.62;
+    g.fillStyle = 'rgba(255,255,255,.82)';
+    g.beginPath();
+    g.arc(x, yy, dot === 0 ? 5 : 2.5, 0, Math.PI * 2);
+    g.fill();
+  }
+
+  g.strokeStyle = 'rgba(255,255,255,.25)';
+  g.beginPath();
+  g.moveTo(42, 730);
+  g.lineTo(SW - 42, 730);
+  g.stroke();
+  g.fillStyle = 'rgba(255,255,255,.5)';
+  g.font = '500 14px "JetBrains Mono"';
+  g.fillText('PORTFOLIO PROJECT', 42, 778);
+  g.textAlign = 'right';
+  g.fillText(`0${index + 1} / 0${PROJECTS.length}`, SW - 42, 778);
   g.textAlign = 'left';
 }
-
-const DRAW = [drawPolicy, drawHeat, drawCloset];
 
 function Monolith({ i, pos }) {
   const root = useRef();
@@ -197,7 +127,7 @@ function Monolith({ i, pos }) {
     if (!root.current.visible) return;
     const t = s.clock.elapsedTime;
     if (d < 32 && frame++ % 2 === 0) {
-      DRAW[i](ctx, t);
+      drawProject(ctx, t, PROJECTS[i], i);
       tex.needsUpdate = true;
     }
     body.current.position.y = Math.sin(t * 0.7 + i) * 0.06;
@@ -222,7 +152,6 @@ function Monolith({ i, pos }) {
           <meshBasicMaterial map={tex} toneMapped={false} />
         </mesh>
       </group>
-      {/* light shaft from above */}
       <mesh position={[0, FLOOR + 6.5, 0]} material={beamMat}>
         <cylinderGeometry args={[0.35, 2.6, 13, 32, 1, true]} />
       </mesh>

@@ -1,26 +1,28 @@
-# Lohitha — Portfolio
+# Sathvik Varma — Portfolio
 
-An immersive 3D portfolio. Scrolling flies the camera through a dark, misty world, one room per section:
+An immersive 3D portfolio for Sathvik Varma, a Computer Science Engineering student at ANITS and aspiring Machine Learning Engineer. Scrolling moves the camera through a cinematic world of interactive portfolio sections.
 
-| Room | What happens |
+## Experience
+
+| Section | Experience |
 | --- | --- |
-| **Smoke chamber** (hero) | 22k particles spell *PORTFOLIO*, flow into *LOHITHA*, and the portrait condenses out of real-time shader smoke |
-| **Portal** | A breathing ring of particles frames the intro; the camera flies through it |
-| **Monolith gallery** | Black glass slabs under light shafts, each with a live animated project screen, reflected in the floor |
-| **Constellation** | Skills as a 3D neural network with travelling signals; hover a category to light it up |
-| **Towers of light** | Coding stats rise from the floor as glowing towers |
-| **Corridor of time** | Walk through lit doorways: 2021 → 2023 → 2026 |
-| **Certificate orbit** | Eight cards orbit a light core; hover to pull one forward |
+| **Smoke chamber** | Particle text morphs from *SATHVIK VARMA* to *MACHINE LEARNING* as a configurable portrait reveals through shader smoke |
+| **Portal** | A breathing ring of particles frames the introduction |
+| **Monolith gallery** | Glass slabs display animated project artwork and project details for every entry in `src/content.js` |
+| **Constellation** | Skills form an interactive 3D neural network with travelling signals |
+| **Towers of light** | Configurable academic and project statistics rise from the floor |
+| **Corridor of time** | Four stops trace school, intermediate, university, and technical learning |
+| **Certificate orbit** | Configurable certificate cards orbit a light core |
 | **Horizon** | A moon rises over the mist for the contact section |
 
 ## Tech
 
 - [React 18](https://react.dev) + [Vite](https://vitejs.dev)
 - [Three.js](https://threejs.org) via [React Three Fiber](https://r3f.docs.pmnd.rs) and [drei](https://github.com/pmndrs/drei)
-- Custom GLSL shaders (particle morph, smoke dissolve, ground mist, moon)
+- Custom GLSL shaders for particle morphing, portrait smoke, ground mist, and the moon
 - [@react-three/postprocessing](https://github.com/pmndrs/react-postprocessing): bloom, film grain, vignette, SMAA
-- [Lenis](https://lenis.darkroom.engineering) smooth scroll
-- Self-hosted fonts via Fontsource: Inter Tight, Instrument Serif, JetBrains Mono
+- [Lenis](https://lenis.darkroom.engineering) smooth scrolling
+- Self-hosted Inter Tight, Instrument Serif, and JetBrains Mono fonts
 
 ## Run locally
 
@@ -29,51 +31,32 @@ npm install
 npm run dev
 ```
 
-Open the URL it prints (usually http://localhost:5173).
-
-## Build & deploy
+## Build and deploy
 
 ```bash
 npm run build
 ```
 
-Deploy the `dist/` folder to any static host: Vercel, Netlify, GitHub Pages or Cloudflare Pages. The build uses relative paths, so it works from a sub-folder too.
+Deploy the generated `dist/` folder to a static host.
+
+## Personal configuration
+
+Update `src/content.js` to edit the profile, projects, skills, statistics, journey, contact links, and verified certifications.
+
+- The uploaded portrait is included at `src/assets/sathvik-portrait.png`. Set `PORTRAIT_URL` in `src/content.js` only to override it with another portrait URL or path served from `public/`.
+- Add the LinkedIn URL, email address, and résumé PDF path to `CONTACT`. Unconfigured links are not shown.
+- Add only earned certifications to `CERTS`; each entry is `[issuer, certificate title]`.
+- Update `STATS` with genuine values. The default entries cover coding problems solved, technical projects, and core technologies.
 
 ## Project structure
 
 ```
 src/
-  content.js        all text: projects, skills, stats, journey, certifications
-  timeline.js       camera path, room positions and scroll timing
+  content.js        portfolio content and configurable personal details
+  timeline.js       camera path, room positions, and scroll timing
   store.js          shared per-frame state
-  App.jsx           canvas, overlay, scroll setup
+  App.jsx           canvas, overlay, and scroll setup
   lib/scroll.js     Lenis smooth scroll
-  world/            3D rooms
-    Hero.jsx          particle name morph + smoke portrait
-    Gate.jsx          particle portal
-    Gallery.jsx       monoliths with canvas-drawn screens
-    Constellation.jsx skills network
-    Towers.jsx        stat towers
-    Corridor.jsx      lit doorways
-    CertOrbit.jsx     orbiting certificate cards
-    Horizon.jsx       moon + horizon light
-    Environment.jsx   reflective floor, dust, ground mist
-    World.jsx         camera rig, fog, post-processing
-  ui/               HTML overlay: text panels, nav, cursor, contact
+  world/            3D rooms and animations
+  ui/               HTML overlay, navigation, cursor, and contact links
 ```
-
-## Make it yours
-
-1. Edit `src/content.js` with your own projects, skills and journey.
-2. Replace `src/assets/lohitha.webp` with a portrait on a transparent background (about 880×940 px works well).
-3. Change the two words in `src/world/Hero.jsx` (search for `sampleWord`).
-
-The contact icons and the Résumé button are display-only by design.
-
-## Performance notes
-
-This is a WebGL-heavy site. Phones get fewer particles and a simpler floor automatically. If a device struggles, lower `dpr` in `App.jsx` or the particle counts in `Hero.jsx`.
-
----
-
-Designed & built by Shamya Lohitha.

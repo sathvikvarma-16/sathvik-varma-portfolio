@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { store, clamp } from '../store.js';
+import { store } from '../store.js';
 import { vis, phase, centerU } from '../timeline.js';
 import { scrollToU } from '../lib/scroll.js';
 import { GROUPS, SKILLS, PROJECTS, STATS, JOURNEY } from '../content.js';
@@ -19,25 +19,6 @@ function Words({ text, base = 0 }) {
       </React.Fragment>
     );
   });
-}
-
-function Count({ to, decimals = 0, on }) {
-  const ref = useRef(null);
-  const done = useRef(false);
-  useEffect(() => {
-    if (!on || done.current) return;
-    done.current = true;
-    const t0 = performance.now();
-    const dur = 1800;
-    const tick = (now) => {
-      const k = clamp((now - t0) / dur);
-      const e = 1 - Math.pow(1 - k, 4);
-      if (ref.current) ref.current.textContent = (to * e).toFixed(decimals);
-      if (k < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }, [on, to, decimals]);
-  return <span ref={ref}>{(0).toFixed(decimals)}</span>;
 }
 
 export default function Overlay({ ready }) {
@@ -81,7 +62,7 @@ export default function Overlay({ ready }) {
 
   const reg = (el) => el && !panels.current.includes(el) && panels.current.push(el);
   const P = (key, shot, className, children, fade) => (
-    <section ref={reg} data-shot={shot} data-key={key} data-fade={fade} className={`pnl ${className}`}>
+    <section key={key} ref={reg} data-shot={shot} data-key={key} data-fade={fade} className={`pnl ${className}`}>
       {children}
     </section>
   );
@@ -100,12 +81,12 @@ export default function Overlay({ ready }) {
         'pnl-hero',
         <>
           <div className="hm-col">
-            <span className="mono dim">Shamya Lohitha</span>
-            <span>Full Stack Developer</span>
+            <span className="mono dim">SATHVIK VARMA</span>
+            <span>Aspiring Machine Learning Engineer</span>
           </div>
           <div className="hm-col right">
-            <span className="mono dim">AI · Systems · Interfaces</span>
-            <span>India — 2026</span>
+            <span className="mono dim">MACHINE LEARNING · AI · DATA SCIENCE</span>
+            <span>Visakhapatnam, India</span>
           </div>
         </>,
         0.25
@@ -118,28 +99,10 @@ export default function Overlay({ ready }) {
         'pnl-about',
         <>
           <span className="mono dim kicker">(01) — Enter</span>
-          <p className="lead">
-            <Words text="I design and engineer *intelligent* products — scalable systems, calm interfaces, and AI that reads the *fine* *print.*" />
-          </p>
-          <div className="stats">
-            <div>
-              <b>
-                <Count to={9.07} decimals={2} on={onSet.about} />
-              </b>
-              <span className="mono dim">CGPA</span>
-            </div>
-            <div>
-              <b>
-                <Count to={1230} on={onSet.about} />+
-              </b>
-              <span className="mono dim">Problems solved</span>
-            </div>
-            <div>
-              <b>
-                0<Count to={8} on={onSet.about} />
-              </b>
-              <span className="mono dim">Certifications</span>
-            </div>
+          <div className="lead">
+            <p><Words text="Computer Science and Engineering student at ANITS, aspiring to build a career in Machine Learning Engineering." /></p>
+            <p><Words text="Developing strong foundations in Python, DSA, SQL, Data Science, and Machine Learning." /></p>
+            <p><Words text="Passionate about problem-solving, continuous learning, and building practical AI-driven solutions through hands-on projects." /></p>
           </div>
         </>
       )}
@@ -169,6 +132,11 @@ export default function Overlay({ ready }) {
                 </li>
               ))}
             </ul>
+            {(p.github || p.link) && (
+              <a className="project-link" href={p.github || p.link} target="_blank" rel="noreferrer">
+                View project on GitHub ↗
+              </a>
+            )}
           </div>
         )
       )}
@@ -216,6 +184,7 @@ export default function Overlay({ ready }) {
               <span className="tw-suf">{s.suffix}</span>
             </span>
             <span className="mono dim">{s.label}</span>
+            {s.detail && <span className="tw-detail">{s.detail}</span>}
           </span>
         ))}
       </div>
@@ -235,13 +204,13 @@ export default function Overlay({ ready }) {
           <div className="honors">
             <div>
               <span className="hn-star">✦</span>
-              <span className="hn-big">Department Topper</span>
-              <span className="mono dim">Data Science</span>
+              <span className="hn-big">B.Tech CSE</span>
+              <span className="mono dim">ANITS · India</span>
             </div>
             <div>
               <span className="hn-star">✦</span>
-              <span className="hn-big">Top 100 Team</span>
-              <span className="mono dim">Myntra WeForShe HackerRamp 2026</span>
+              <span className="hn-big">Aspiring ML Engineer</span>
+              <span className="mono dim">Machine Learning · AI · Data Science</span>
             </div>
           </div>
         </>,
@@ -278,8 +247,9 @@ export default function Overlay({ ready }) {
         <>
           <span className="mono dim">(06) Credentials</span>
           <h2 className="big">
-            <Words text="Eight *certifications*" />
+            <Words text="Your *certifications*" />
           </h2>
+          <p className="cert-note">Verified certifications can be added in src/content.js.</p>
         </>,
         0.4
       )}
@@ -297,9 +267,6 @@ function Nav({ show }) {
   const go = (id) => scrollToU(centerU(tl, tl.index[id]));
   return (
     <nav className={`nav ${show ? 'show' : ''}`}>
-      <button className="nav-mark" onClick={() => scrollToU(0)} aria-label="Back to start">
-        L<span>.</span>
-      </button>
       <div className="nav-links">
         {[
           ['work0', 'Work'],

@@ -2,7 +2,7 @@ export const PORTRAIT_URL = '';
 
 export const CONTACT = {
   github: 'https://github.com/sathvikvarma-16',
-  linkedin: 'https://www.linkedin.com/in/sathvik-varma-16/',
+  linkedin: 'https://www.linkedin.com/in/sathvikvarma16/',
   email: 'sathvikvarma16@gmail.com',
   resume: '/Sathvik%20Varma.pdf',
 };

@@ -85,6 +85,7 @@ export default function Constellation() {
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const v = useMemo(() => new THREE.Vector3(), []);
   const lastGroup = useRef('init');
+  const labelsVisible = useRef(false);
 
   useFrame((s, dt) => {
     const d = Math.abs(s.camera.position.z - L.skills.z);
@@ -93,8 +94,9 @@ export default function Constellation() {
     const t = s.clock.elapsedTime;
     const g = spin.current;
     g.rotation.y += dt * 0.08;
-    g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, store.smouse.y * 0.35, 0.04);
-    g.rotation.z = THREE.MathUtils.lerp(g.rotation.z, -store.smouse.x * 0.2, 0.04);
+    const mouseEase = 1 - Math.exp(-dt * 2.45);
+    g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, store.smouse.y * 0.35, mouseEase);
+    g.rotation.z = THREE.MathUtils.lerp(g.rotation.z, -store.smouse.x * 0.2, mouseEase);
     core.current.rotation.y = t * 0.3;
     core.current.rotation.x = t * 0.17;
     solid.current.rotation.y = -t * 0.5;
@@ -102,19 +104,20 @@ export default function Constellation() {
     core.current.scale.setScalar(pulse);
 
     const grp = store.skillGroup;
-    // nodes
-    pts.forEach((p, i) => {
-      const on = grp && SKILLS[i].g === grp;
-      dummy.position.copy(p);
-      dummy.scale.setScalar(on ? 2.2 : grp ? 0.7 : 1);
-      dummy.updateMatrix();
-      nodes.current.setMatrixAt(i, dummy.matrix);
-    });
-    nodes.current.instanceMatrix.needsUpdate = true;
-
     // highlighted links among the active group
     if (lastGroup.current !== grp) {
       lastGroup.current = grp;
+      pts.forEach((p, i) => {
+        const on = grp && SKILLS[i].g === grp;
+        dummy.position.copy(p);
+        dummy.scale.setScalar(on ? 2.2 : grp ? 0.7 : 1);
+        dummy.updateMatrix();
+        nodes.current.setMatrixAt(i, dummy.matrix);
+        const el = store.labels.skills[i];
+        if (el) el.classList.toggle('hl', !!on);
+      });
+      nodes.current.instanceMatrix.needsUpdate = true;
+
       const arr = hiGeo.attributes.position.array;
       let k = 0;
       if (grp) {
@@ -154,25 +157,34 @@ export default function Constellation() {
     const sv = vis(tl, store.off, tl.index.skills, 0.5);
     const labels = store.labels.skills;
     const w = size.width, h = size.height;
-    pts.forEach((p, i) => {
-      const el = labels[i];
-      if (!el) return;
-      v.copy(p).applyMatrix4(g.matrixWorld);
-      const dist = v.distanceTo(s.camera.position);
-      v.project(s.camera);
-      if (sv <= 0.01 || v.z > 1) {
-        el.style.opacity = '0';
-        return;
+    if (sv <= 0.01) {
+      if (labelsVisible.current) {
+        labels.forEach((el) => {
+          if (el) el.style.opacity = '0';
+        });
+        labelsVisible.current = false;
       }
-      const x = (v.x * 0.5 + 0.5) * w;
-      const y = (-v.y * 0.5 + 0.5) * h;
-      const depth = clamp((18 - dist) / 8, 0, 1); // nearer = brighter
-      const on = grp && SKILLS[i].g === grp;
-      const o = sv * (grp ? (on ? 1 : 0.12) : 0.25 + depth * 0.75);
-      el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -140%) scale(${0.75 + depth * 0.45 + (on ? 0.2 : 0)})`;
-      el.style.opacity = o.toFixed(3);
-      el.classList.toggle('hl', !!on);
-    });
+    } else {
+      labelsVisible.current = true;
+      pts.forEach((p, i) => {
+        const el = labels[i];
+        if (!el) return;
+        v.copy(p).applyMatrix4(g.matrixWorld);
+        const dist = v.distanceTo(s.camera.position);
+        v.project(s.camera);
+        if (v.z > 1) {
+          el.style.opacity = '0';
+          return;
+        }
+        const x = (v.x * 0.5 + 0.5) * w;
+        const y = (-v.y * 0.5 + 0.5) * h;
+        const depth = clamp((18 - dist) / 8, 0, 1); // nearer = brighter
+        const on = grp && SKILLS[i].g === grp;
+        const o = sv * (grp ? (on ? 1 : 0.12) : 0.25 + depth * 0.75);
+        el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -140%) scale(${0.75 + depth * 0.45 + (on ? 0.2 : 0)})`;
+        el.style.opacity = o.toFixed(3);
+      });
+    }
   });
 
   return (

@@ -127,4 +127,37 @@ export const JOURNEY = [
   },
 ];
 
-export const CERTS = [];
+export const CERTS = [
+  {
+    title: '1M1B | AI for Sustainability',
+    issuer: '1M1B',
+    mark: '1M1B',
+    description: 'Successfully completed the AI for Sustainability certification.',
+    credentialUrl: null,
+    image: null,
+  },
+  {
+    title: 'Use Generative AI for Software Development',
+    issuer: 'IBM SkillsBuild',
+    mark: 'IBM',
+    description: 'Successfully completed the Use Generative AI for Software Development certification.',
+    credentialUrl: null,
+    image: null,
+  },
+  {
+    title: 'AI Skills Passport',
+    issuer: 'EY and Microsoft',
+    mark: 'EY × MS',
+    description: 'Successfully completed the AI Skills Passport program offered by EY and Microsoft.',
+    credentialUrl: null,
+    image: null,
+  },
+  {
+    title: 'Oracle Certification',
+    issuer: 'Oracle',
+    mark: 'ORACLE',
+    description: 'Successfully earned an Oracle Certification credential.',
+    credentialUrl: null,
+    image: null,
+  },
+];

@@ -7,7 +7,7 @@ import { PROJECTS } from '../content.js';
 
 const SW = 512;
 const SH = 900;
-const RES = 1.6;
+const RES = 1.25;
 
 function drawProject(g, t, project, index) {
   g.fillStyle = '#0b0b0c';
@@ -119,16 +119,17 @@ function Monolith({ i, pos }) {
       }),
     []
   );
-  let frame = 0;
+  const lastDraw = useRef(0);
 
   useFrame((s) => {
     const d = Math.abs(s.camera.position.z - pos.z);
     root.current.visible = d < 50;
     if (!root.current.visible) return;
     const t = s.clock.elapsedTime;
-    if (d < 32 && frame++ % 2 === 0) {
+    if (d < 32 && (lastDraw.current === 0 || t - lastDraw.current >= 1 / 24)) {
       drawProject(ctx, t, PROJECTS[i], i);
       tex.needsUpdate = true;
+      lastDraw.current = t;
     }
     body.current.position.y = Math.sin(t * 0.7 + i) * 0.06;
     body.current.rotation.y = yaw + Math.sin(t * 0.35 + i) * 0.05;

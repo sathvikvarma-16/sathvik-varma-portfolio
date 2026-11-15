@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { store } from '../store.js';
 import { vis, phase, centerU } from '../timeline.js';
 import { scrollToU } from '../lib/scroll.js';
-import { GROUPS, SKILLS, PROJECTS, STATS, JOURNEY } from '../content.js';
+import { GROUPS, SKILLS, PROJECTS, STATS, JOURNEY, CERTS } from '../content.js';
 import Contact from './Contact.jsx';
 
 function Words({ text, base = 0 }) {
@@ -25,7 +25,6 @@ export default function Overlay({ ready }) {
   const tl = store.tl;
   const I = tl.index;
   const panels = useRef([]);
-  const [onSet, setOnSet] = useState({});
   const [group, setGroup] = useState(null);
   const onRef = useRef({});
 
@@ -34,7 +33,6 @@ export default function Overlay({ ready }) {
     const loop = () => {
       raf = requestAnimationFrame(loop);
       const u = store.off;
-      let changed = false;
       panels.current.forEach((el) => {
         if (!el) return;
         const i = Number(el.dataset.shot);
@@ -51,10 +49,8 @@ export default function Overlay({ ready }) {
         if (onRef.current[key] !== on) {
           onRef.current[key] = on;
           el.classList.toggle('on', on);
-          changed = true;
         }
       });
-      if (changed) setOnSet({ ...onRef.current });
     };
     loop();
     return () => cancelAnimationFrame(raf);
@@ -245,11 +241,58 @@ export default function Overlay({ ready }) {
         I.certs,
         'pnl-certs',
         <>
-          <span className="mono dim">(06) Credentials</span>
-          <h2 className="big">
-            <Words text="Your *certifications*" />
-          </h2>
-          <p className="cert-note">Verified certifications can be added in src/content.js.</p>
+          <div className="cert-heading">
+            <div className="cert-heading-top">
+              <span className="mono dim">(06) Credentials</span>
+              <span className="mono cert-count">04 <span>/</span> COMPLETED</span>
+            </div>
+            <div className="cert-heading-main">
+              <h2 className="big">
+                <Words text="Proof of *practice*" />
+              </h2>
+              <p>Learning at the intersection of AI, software, and real-world impact.</p>
+            </div>
+          </div>
+          <div className="cert-grid">
+            {CERTS.map((cert, i) => (
+              <article className="cert-card" key={cert.title} style={{ transitionDelay: `${0.08 + i * 0.07}s` }}>
+                <div className="cert-card-main">
+                  <div className="cert-card-head">
+                    <span className="cert-mark" aria-hidden="true">{cert.mark}</span>
+                    <span className="cert-issuer">{cert.issuer}</span>
+                  </div>
+                  <h3>{cert.title}</h3>
+                  <p className="cert-description">{cert.description}</p>
+                  <div className="cert-status">
+                    <svg aria-hidden="true" viewBox="0 0 16 16" fill="none">
+                      <circle cx="8" cy="8" r="7" />
+                      <path d="m4.7 8.1 2.1 2.1 4.5-4.5" />
+                    </svg>
+                    <span>Completed</span>
+                  </div>
+                </div>
+                <div className="cert-card-art" aria-hidden="true">
+                  {cert.image ? (
+                    <img src={cert.image} alt="" />
+                  ) : (
+                    <>
+                      <span className="cert-art-index">0{i + 1}</span>
+                      <svg viewBox="0 0 48 48" fill="none">
+                        <path d="M24 5.5 29 9l6.1-.2 1.9 5.8 5 3.5-1.8 5.8 1.8 5.9-5 3.5-1.9 5.8L29 39l-5 3.5L19 39l-6.1.2L11 33.4l-5-3.5 1.8-5.9L6 18.3l5-3.5 1.9-5.8L19 9l5-3.5Z" />
+                        <path d="m17.5 24 4.2 4.2 8.8-8.8" />
+                      </svg>
+                      <span className="cert-art-label">CREDENTIAL</span>
+                    </>
+                  )}
+                </div>
+                {cert.credentialUrl && (
+                  <a className="cert-link" href={cert.credentialUrl} target="_blank" rel="noreferrer">
+                    View Credential <span aria-hidden="true">↗</span>
+                  </a>
+                )}
+              </article>
+            ))}
+          </div>
         </>,
         0.4
       )}

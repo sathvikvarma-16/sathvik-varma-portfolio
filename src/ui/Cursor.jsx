@@ -9,27 +9,38 @@ export default function Cursor() {
     if (!fine) return;
     document.documentElement.classList.add('has-cursor');
     let x = -100, y = -100, rx = -100, ry = -100, hover = false;
+    let lastHover = null;
+    let raf = null;
     const move = (e) => {
       x = e.clientX;
       y = e.clientY;
       hover = !!e.target.closest?.('button, a');
+      schedule();
     };
     window.addEventListener('pointermove', move);
-    let raf;
+    const schedule = () => {
+      if (raf === null) raf = requestAnimationFrame(tick);
+    };
     const tick = () => {
-      raf = requestAnimationFrame(tick);
+      raf = null;
       rx += (x - rx) * 0.18;
       ry += (y - ry) * 0.18;
       if (dot.current) dot.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       if (ring.current) {
         ring.current.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
-        ring.current.classList.toggle('is-hover', hover || store.hover3d);
+        const isHover = hover || store.hover3d;
+        if (lastHover !== isHover) {
+          lastHover = isHover;
+          ring.current.classList.toggle('is-hover', isHover);
+        }
       }
+      if (Math.abs(x - rx) > 0.1 || Math.abs(y - ry) > 0.1) schedule();
     };
-    tick();
+    schedule();
     return () => {
-      cancelAnimationFrame(raf);
+      if (raf !== null) cancelAnimationFrame(raf);
       window.removeEventListener('pointermove', move);
+      document.documentElement.classList.remove('has-cursor');
     };
   }, []);
   return (

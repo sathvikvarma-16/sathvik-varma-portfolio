@@ -248,7 +248,7 @@ export default function Hero() {
     if (!data) return;
     const tl = store.tl;
     if (!store.introDone) {
-      store.introT += Math.min(dt, 0.05) * (store.reduced ? 3 : 1);
+      store.introT += dt * (store.reduced ? 3 : 1);
       if (store.introT > 6.7) {
         store.introDone = true;
         store.onIntroDone?.();

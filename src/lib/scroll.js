@@ -17,7 +17,7 @@ const raf = (time) => {
 
 export function initScroll() {
   if (lenis) return lenis;
-  lenis = new Lenis({ lerp: 0.075, wheelMultiplier: 0.85, touchMultiplier: 1.4, smoothWheel: true });
+  lenis = new Lenis({ smoothWheel: false, syncTouch: false });
   const update = () => {
     const max = document.documentElement.scrollHeight - window.innerHeight;
     store.target = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
@@ -40,7 +40,7 @@ export function scrollToU(u) {
   const max = document.documentElement.scrollHeight - window.innerHeight;
   const y = u * max;
   if (lenis) {
-    lenis.scrollTo(y, { duration: 2.6, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) });
+    lenis.scrollTo(y, { duration: 0.9, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) });
     requestFrame();
   } else window.scrollTo({ top: y, behavior: 'smooth' });
 }

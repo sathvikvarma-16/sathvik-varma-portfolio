@@ -29,9 +29,12 @@ export default function Overlay({ ready }) {
   const onRef = useRef({});
 
   useEffect(() => {
-    let raf;
+    let raf = null;
+    const requestUpdate = () => {
+      if (raf === null) raf = requestAnimationFrame(loop);
+    };
     const loop = () => {
-      raf = requestAnimationFrame(loop);
+      raf = null;
       const u = store.off;
       panels.current.forEach((el) => {
         if (!el) return;
@@ -51,9 +54,14 @@ export default function Overlay({ ready }) {
           el.classList.toggle('on', on);
         }
       });
+      if (!store.introDone || Math.abs(store.target - store.off) > 0.0001) requestUpdate();
     };
-    loop();
-    return () => cancelAnimationFrame(raf);
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    requestUpdate();
+    return () => {
+      window.removeEventListener('scroll', requestUpdate);
+      if (raf !== null) cancelAnimationFrame(raf);
+    };
   }, [tl]);
 
   const reg = (el) => el && !panels.current.includes(el) && panels.current.push(el);

@@ -23,8 +23,8 @@ export default function Cursor() {
     };
     const tick = () => {
       raf = null;
-      rx += (x - rx) * 0.18;
-      ry += (y - ry) * 0.18;
+      rx += (x - rx) * 0.32;
+      ry += (y - ry) * 0.32;
       if (dot.current) dot.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       if (ring.current) {
         ring.current.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;

@@ -1,46 +1,53 @@
-import Lenis from 'lenis';
 import { store } from '../store.js';
 
-let lenis = null;
-let rafId = null;
+let maxScroll = 0;
+let resizeObserver = null;
+let initialized = false;
+let measureFrame = null;
 
-const requestFrame = () => {
-  if (lenis && rafId === null) rafId = requestAnimationFrame(raf);
+const updateProgress = () => {
+  store.target = maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0;
 };
 
-const raf = (time) => {
-  rafId = null;
-  if (!lenis) return;
-  lenis.raf(time);
-  if (lenis.isScrolling) requestFrame();
+const measureScrollRange = () => {
+  maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  updateProgress();
+};
+
+const scheduleMeasure = () => {
+  if (measureFrame !== null) return;
+  measureFrame = requestAnimationFrame(() => {
+    measureFrame = null;
+    measureScrollRange();
+  });
 };
 
 export function initScroll() {
-  if (lenis) return lenis;
-  lenis = new Lenis({ smoothWheel: false, syncTouch: false });
-  const update = () => {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    store.target = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-  };
-  lenis.on('scroll', update);
-  lenis.on('virtual-scroll', requestFrame);
-  return lenis;
+  if (initialized) return;
+  initialized = true;
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  window.addEventListener('resize', scheduleMeasure, { passive: true });
+  if ('ResizeObserver' in window) {
+    resizeObserver = new ResizeObserver(measureScrollRange);
+    resizeObserver.observe(document.documentElement);
+  }
+  measureScrollRange();
 }
 
-export const getScroll = () => lenis;
-
 export function destroyScroll() {
-  if (rafId !== null) cancelAnimationFrame(rafId);
-  rafId = null;
-  lenis?.destroy();
-  lenis = null;
+  if (!initialized) return;
+  window.removeEventListener('scroll', updateProgress);
+  window.removeEventListener('resize', scheduleMeasure);
+  if (measureFrame !== null) cancelAnimationFrame(measureFrame);
+  measureFrame = null;
+  resizeObserver?.disconnect();
+  resizeObserver = null;
+  initialized = false;
 }
 
 export function scrollToU(u) {
-  const max = document.documentElement.scrollHeight - window.innerHeight;
-  const y = u * max;
-  if (lenis) {
-    lenis.scrollTo(y, { duration: 0.9, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) });
-    requestFrame();
-  } else window.scrollTo({ top: y, behavior: 'smooth' });
+  window.scrollTo({
+    top: Math.min(1, Math.max(0, u)) * maxScroll,
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+  });
 }

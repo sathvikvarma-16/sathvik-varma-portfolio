@@ -51,7 +51,7 @@ void main(){ float d = length(gl_PointCoord-0.5); gl_FragColor = vec4(vec3(1.0),
 export function Dust() {
   const { gl } = useThree();
   const geo = useMemo(() => {
-    const N = store.mobile ? 2200 : 4200;
+    const N = store.mobile ? 1500 : 4200;
     const p = new Float32Array(N * 3);
     const r = new Float32Array(N);
     for (let i = 0; i < N; i++) {
@@ -86,13 +86,13 @@ export function Dust() {
 
 /* soft ground mist that travels with the camera — no hard sprite edges */
 const mistFrag = /* glsl */ `
-uniform float uTime, uOpacity;
+uniform float uTime, uOpacity, uOctaves;
 uniform vec3 uCam;
 varying vec3 vW;
 float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
 float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
   return mix(mix(hash(i),hash(i+vec2(1,0)),f.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x), f.y); }
-float fbm(vec2 p){ float v=0., a=.5; for(int i=0;i<5;i++){ v+=a*noise(p); p=p*2.02+vec2(1.3,7.1); a*=.5;} return v; }
+float fbm(vec2 p){ float v=0., a=.5; for(int i=0;i<5;i++){ if(float(i)>=uOctaves) break; v+=a*noise(p); p=p*2.02+vec2(1.3,7.1); a*=.5;} return v; }
 void main(){
   vec2 p = vW.xz * 0.11;
   float t = uTime * 0.03;
@@ -115,7 +115,12 @@ export function GroundMist() {
         mat: new THREE.ShaderMaterial({
           transparent: true,
           depthWrite: false,
-          uniforms: { uTime: { value: 0 }, uOpacity: { value: l.o }, uCam: { value: new THREE.Vector3() } },
+          uniforms: {
+            uTime: { value: 0 },
+            uOpacity: { value: l.o },
+            uOctaves: { value: store.mobile ? 3 : 5 },
+            uCam: { value: new THREE.Vector3() },
+          },
           vertexShader: 'varying vec3 vW; void main(){ vec4 w = modelMatrix*vec4(position,1.0); vW=w.xyz; gl_Position=projectionMatrix*viewMatrix*w; }',
           fragmentShader: mistFrag,
         }),

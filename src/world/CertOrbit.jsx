@@ -51,7 +51,7 @@ function cardTexture(issuer, title, i) {
   g.fillText('✦  CERTIFIED', 44, CH - 50);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 8;
+  t.anisotropy = 4;
   return t;
 }
 

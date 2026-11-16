@@ -1,18 +1,19 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { store } from './store.js';
 import { buildTimeline } from './timeline.js';
-import { initScroll, getScroll, destroyScroll } from './lib/scroll.js';
-import World from './world/World.jsx';
+import { initScroll, destroyScroll } from './lib/scroll.js';
 import Overlay from './ui/Overlay.jsx';
 import Cursor from './ui/Cursor.jsx';
 
 const UNIT_VH = 58; // scroll length per timeline unit
+const World = lazy(() => import('./world/World.jsx'));
 
 export default function App() {
   const [fonts, setFonts] = useState(false);
   const [ready, setReady] = useState(false);
   const [mobile, setMobile] = useState(() => window.innerWidth < 760);
+  const [pageVisible, setPageVisible] = useState(() => !document.hidden);
 
   const tl = useMemo(() => {
     store.mobile = mobile;
@@ -24,25 +25,23 @@ export default function App() {
   useEffect(() => {
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     window.scrollTo(0, 0);
-    document.documentElement.classList.add('locked');
     const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     const onMotionChange = (event) => {
       store.reduced = event.matches;
     };
     motionPreference.addEventListener('change', onMotionChange);
-    const l = initScroll();
-    l.stop();
-    store.onIntroDone = () => {
-      document.documentElement.classList.remove('locked');
-      getScroll()?.start();
-      setReady(true);
-    };
+    initScroll();
+    store.onIntroDone = () => setReady(true);
+    const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     const move = (e) => {
-      if (e.pointerType === 'mouse') store.hasPointer = true;
+      if (e.pointerType !== 'mouse' || store.reduced) return;
+      store.hasPointer = true;
       store.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
       store.mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
     };
-    window.addEventListener('pointermove', move);
+    if (hasFinePointer) window.addEventListener('pointermove', move, { passive: true });
+    const onVisibilityChange = () => setPageVisible(!document.hidden);
+    document.addEventListener('visibilitychange', onVisibilityChange);
     let active = true;
     let fontTimer;
     const timeout = new Promise((r) => {
@@ -74,7 +73,8 @@ export default function App() {
       active = false;
       window.clearTimeout(fontTimer);
       motionPreference.removeEventListener('change', onMotionChange);
-      window.removeEventListener('pointermove', move);
+      if (hasFinePointer) window.removeEventListener('pointermove', move);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('resize', onResize);
       store.onIntroDone = null;
       destroyScroll();
@@ -89,11 +89,14 @@ export default function App() {
             key={mobile ? 'mobile' : 'desktop'}
             eventSource={document.getElementById('root')}
             eventPrefix="client"
-            dpr={[1, Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2)]}
+            frameloop={pageVisible ? 'always' : 'never'}
+            dpr={[1, Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.75)]}
             gl={{ antialias: false, powerPreference: 'high-performance', alpha: false }}
             camera={{ fov: mobile ? 54 : 40, near: 0.1, far: 420, position: [0, 0, 8] }}
           >
-            <World />
+            <Suspense fallback={null}>
+              <World />
+            </Suspense>
           </Canvas>
         )}
       </div>

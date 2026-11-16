@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { CONTACT } from '../content.js';
 
 const Icons = {
@@ -27,13 +27,39 @@ const Icons = {
 
 function Magnetic({ className, label, href, children, download = false }) {
   const ref = useRef(null);
-  const onMove = (e) => {
-    const r = ref.current.getBoundingClientRect();
-    const x = (e.clientX - r.left - r.width / 2) * 0.35;
-    const y = (e.clientY - r.top - r.height / 2) * 0.35;
-    ref.current.style.transform = `translate(${x}px, ${y}px)`;
+  const bounds = useRef(null);
+  const pointer = useRef({ x: 0, y: 0 });
+  const raf = useRef(null);
+  useEffect(
+    () => () => {
+      if (raf.current !== null) cancelAnimationFrame(raf.current);
+    },
+    []
+  );
+  const onEnter = (e) => {
+    if (e.pointerType !== 'mouse') return;
+    bounds.current = ref.current?.getBoundingClientRect() ?? null;
   };
-  const reset = () => (ref.current.style.transform = '');
+  const onMove = (e) => {
+    if (e.pointerType !== 'mouse' || !bounds.current) return;
+    pointer.current.x = e.clientX;
+    pointer.current.y = e.clientY;
+    if (raf.current !== null) return;
+    raf.current = requestAnimationFrame(() => {
+      raf.current = null;
+      const r = bounds.current;
+      if (!r || !ref.current) return;
+      const x = (pointer.current.x - r.left - r.width / 2) * 0.35;
+      const y = (pointer.current.y - r.top - r.height / 2) * 0.35;
+      ref.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    });
+  };
+  const reset = () => {
+    if (raf.current !== null) cancelAnimationFrame(raf.current);
+    raf.current = null;
+    bounds.current = null;
+    if (ref.current) ref.current.style.transform = '';
+  };
   const external = href.startsWith('http');
   return (
     <a
@@ -44,8 +70,9 @@ function Magnetic({ className, label, href, children, download = false }) {
       target={external ? '_blank' : undefined}
       rel={external ? 'noreferrer' : undefined}
       download={download || undefined}
-      onMouseMove={onMove}
-      onMouseLeave={reset}
+      onPointerEnter={onEnter}
+      onPointerMove={onMove}
+      onPointerLeave={reset}
     >
       {children}
     </a>

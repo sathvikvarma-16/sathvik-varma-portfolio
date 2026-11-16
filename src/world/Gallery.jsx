@@ -95,7 +95,7 @@ function Monolith({ i, pos }) {
     c.height = SH * RES;
     const t = new THREE.CanvasTexture(c);
     t.colorSpace = THREE.SRGBColorSpace;
-    t.anisotropy = 8;
+    t.anisotropy = 4;
     return { canvas: c, tex: t };
   }, []);
   const ctx = useMemo(() => {

@@ -13,6 +13,7 @@ function Arch({ z, i }) {
   useFrame((s) => {
     const d = s.camera.position.z - z;
     ref.current.visible = Math.abs(d) < 60;
+    if (!ref.current.visible) return;
     // light up when the camera reaches it, fade once passed
     const k = d > 0 ? THREE.MathUtils.clamp(1 - (d - 4) / 14, 0.25, 1) : THREE.MathUtils.clamp(1 + d / 3, 0, 1);
     const c = 0.35 + k * 1.15;

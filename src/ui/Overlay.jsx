@@ -281,7 +281,7 @@ export default function Overlay({ ready }) {
                 </div>
                 <div className="cert-card-art" aria-hidden="true">
                   {cert.image ? (
-                    <img src={cert.image} alt="" />
+                    <img src={cert.image} alt="" loading="lazy" decoding="async" />
                   ) : (
                     <>
                       <span className="cert-art-index">0{i + 1}</span>

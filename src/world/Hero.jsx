@@ -123,7 +123,7 @@ export default function Hero() {
   const [data, setData] = useState(null);
   const tex = useTexture(PORTRAIT_URL || portraitAsset);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 8;
+  tex.anisotropy = 4;
 
   const textGroup = useRef();
   const portrait = useRef();
@@ -135,10 +135,14 @@ export default function Hero() {
   useEffect(() => {
     let alive = true;
     const font = '900 220px "Inter Tight"';
-    const timeout = new Promise((r) => setTimeout(r, 2500));
+    let timeoutId;
+    const timeout = new Promise((r) => {
+      timeoutId = window.setTimeout(r, 2500);
+    });
     Promise.race([Promise.all([document.fonts.load(font), document.fonts.load('400 40px "Instrument Serif"'), document.fonts.load('500 20px "JetBrains Mono"')]), timeout]).then(() => {
+      window.clearTimeout(timeoutId);
       if (!alive) return;
-      const N = store.mobile ? 9000 : 22000;
+      const N = store.mobile ? 6500 : 22000;
       const norm = Math.max(measure('SATHVIK VARMA', font), measure('MACHINE LEARNING', font));
       const A = sampleWord('SATHVIK VARMA', N, norm, font);
       const B = sampleWord('MACHINE LEARNING', N, norm, font);
@@ -166,6 +170,7 @@ export default function Hero() {
     });
     return () => {
       alive = false;
+      window.clearTimeout(timeoutId);
     };
   }, []);
 

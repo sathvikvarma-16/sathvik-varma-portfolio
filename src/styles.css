@@ -18,25 +18,12 @@
 html,
 body {
   margin: 0;
+  overflow-x: clip;
   background: #09090a;
   color: var(--ink);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-html.locked,
-html.locked body {
-  overflow: hidden;
-}
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
-}
-.lenis.lenis-stopped {
-  overflow: hidden;
 }
 ::selection {
   background: #f2f2f2;
@@ -46,6 +33,7 @@ button {
   font: inherit;
   color: inherit;
   cursor: pointer;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 em {
@@ -96,6 +84,7 @@ html.has-cursor * {
   pointer-events: none;
   border-radius: 50%;
   mix-blend-mode: difference;
+  will-change: transform;
 }
 .cursor-dot {
   width: 6px;
@@ -108,12 +97,12 @@ html.has-cursor * {
   height: 40px;
   margin: -20px 0 0 -20px;
   border: 1px solid rgba(255, 255, 255, 0.7);
-  transition: width 0.25s var(--ease), height 0.25s var(--ease), margin 0.25s var(--ease), background 0.2s, border-color 0.2s;
+  scale: 1;
+  transition: scale 0.25s var(--ease), background 0.2s, border-color 0.2s;
+  transform-origin: center;
 }
 .cursor-ring.is-hover {
-  width: 80px;
-  height: 80px;
-  margin: -40px 0 0 -40px;
+  scale: 2;
   background: #fff;
   border-color: transparent;
 }
@@ -176,7 +165,6 @@ html.has-cursor * {
   inset: 0;
   opacity: 0;
   visibility: hidden;
-  will-change: opacity, transform;
 }
 .wd {
   display: inline-block;
@@ -332,7 +320,7 @@ html.has-cursor * {
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 99px;
   background: rgba(10, 10, 11, 0.4);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(4px);
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.06em;
@@ -410,7 +398,6 @@ html.has-cursor * {
   top: 0;
   opacity: 0;
   white-space: nowrap;
-  will-change: transform, opacity;
 }
 .sk-label {
   font-size: 0.95rem;
@@ -803,7 +790,7 @@ html.has-cursor * {
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: rgba(10, 10, 11, 0.35);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(5px);
   color: #e8e8ea;
   transition: background 0.45s var(--ease), color 0.45s, border-color 0.45s, transform 0.5s var(--ease);
   text-decoration: none;
@@ -827,7 +814,7 @@ html.has-cursor * {
   border-radius: 99px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(10, 10, 11, 0.35);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(5px);
   font-size: 1.05rem;
   font-weight: 500;
   transition: transform 0.5s var(--ease);
@@ -1114,6 +1101,15 @@ html.has-cursor * {
   }
 }
 
+@media (hover: none), (pointer: coarse) {
+  .nav-link:hover .nav-roll,
+  .cert-card:hover,
+  .cert-card:hover .cert-card-art,
+  .soc:hover {
+    transform: none !important;
+  }
+}
+
 @media (max-width: 380px) {
   .cert-card {
     grid-template-columns: minmax(0, 1fr) 32px;
@@ -1129,6 +1125,26 @@ html.has-cursor * {
   }
   .cert-description {
     font-size: 0.64rem;
+  }
+}
+
+@media (max-width: 760px), (hover: none) and (pointer: coarse) {
+  .chips li,
+  .soc,
+  .resume {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (hover: none) and (pointer: coarse), (prefers-reduced-motion: reduce) {
+  html.has-cursor,
+  html.has-cursor * {
+    cursor: auto !important;
+  }
+  .cursor-dot,
+  .cursor-ring {
+    display: none;
   }
 }
 

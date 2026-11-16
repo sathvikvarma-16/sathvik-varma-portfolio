@@ -21,7 +21,7 @@ An immersive 3D portfolio for Sathvik Varma, a Computer Science Engineering stud
 - [Three.js](https://threejs.org) via [React Three Fiber](https://r3f.docs.pmnd.rs) and [drei](https://github.com/pmndrs/drei)
 - Custom GLSL shaders for particle morphing, portrait smoke, ground mist, and the moon
 - [@react-three/postprocessing](https://github.com/pmndrs/react-postprocessing): bloom, film grain, vignette, SMAA
-- [Lenis](https://lenis.darkroom.engineering) smooth scrolling
+- Native browser scrolling with passive progress tracking
 - Self-hosted Inter Tight, Instrument Serif, and JetBrains Mono fonts
 
 ## Run locally
@@ -56,7 +56,7 @@ src/
   timeline.js       camera path, room positions, and scroll timing
   store.js          shared per-frame state
   App.jsx           canvas, overlay, and scroll setup
-  lib/scroll.js     Lenis smooth scroll
+  lib/scroll.js     native scroll progress and navigation
   world/            3D rooms and animations
   ui/               HTML overlay, navigation, cursor, and contact links
 ```

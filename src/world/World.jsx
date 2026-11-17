@@ -1,4 +1,4 @@
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom, Noise, Vignette, SMAA } from '@react-three/postprocessing';
@@ -39,6 +39,74 @@ function CameraRig() {
   return null;
 }
 
+function ScenePrewarm() {
+  const { gl, scene, camera } = useThree();
+  const queued = useRef(false);
+  const idleTask = useRef(null);
+
+  useFrame(() => {
+    if (queued.current || !store.ready) return;
+    queued.current = true;
+
+    const warm = () => {
+      idleTask.current = null;
+      const warmScene = scene.clone(true);
+      const textures = new Set();
+      warmScene.traverse((object) => {
+        object.visible = true;
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        materials.forEach((material) => {
+          if (!material) return;
+          if (material.map?.isTexture) textures.add(material.map);
+          Object.values(material.uniforms || {}).forEach((uniform) => {
+            const value = uniform.value;
+            if (value?.isTexture) textures.add(value);
+            else if (Array.isArray(value)) value.forEach((item) => item?.isTexture && textures.add(item));
+          });
+        });
+      });
+
+      try {
+        textures.forEach((texture) => gl.initTexture(texture));
+        warmScene.updateMatrixWorld(true);
+        camera.updateMatrixWorld();
+        if (typeof gl.compileAsync === 'function') {
+          gl.compileAsync(warmScene, camera).then(
+            () => warmScene.clear(),
+            (error) => {
+              warmScene.clear();
+              console.error('Scene shader prewarm failed', error);
+            }
+          );
+        } else {
+          gl.compile(warmScene, camera);
+          warmScene.clear();
+        }
+      } catch (error) {
+        warmScene.clear();
+        console.error('Scene prewarm failed', error);
+      }
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+      idleTask.current = { kind: 'idle', id: window.requestIdleCallback(warm, { timeout: 2000 }) };
+    } else {
+      idleTask.current = { kind: 'timeout', id: window.setTimeout(warm, 100) };
+    }
+  });
+
+  useEffect(
+    () => () => {
+      if (!idleTask.current) return;
+      if (idleTask.current.kind === 'idle') window.cancelIdleCallback(idleTask.current.id);
+      else window.clearTimeout(idleTask.current.id);
+    },
+    []
+  );
+
+  return null;
+}
+
 export default function World() {
   const mobile = store.mobile;
   return (
@@ -48,6 +116,7 @@ export default function World() {
       <ambientLight intensity={0.18} />
       <hemisphereLight args={['#c9c9d2', '#050505', 0.35]} />
       <CameraRig />
+      <ScenePrewarm />
       <Suspense fallback={null}>
         <Hero />
       </Suspense>

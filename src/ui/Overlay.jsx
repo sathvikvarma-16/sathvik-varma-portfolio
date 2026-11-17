@@ -37,6 +37,7 @@ export default function Overlay({ ready }) {
 
   useEffect(() => {
     let raf = null;
+    const previousValues = new WeakMap();
     const requestUpdate = () => {
       if (raf === null) raf = requestAnimationFrame(loop);
     };
@@ -50,10 +51,31 @@ export default function Overlay({ ready }) {
         let v = vis(tl, u, i, fade);
         if (i === 0 && !store.introDone) v = 0;
         const ph = phase(tl, u, i, fade);
-        el.style.opacity = v.toFixed(3);
-        el.style.visibility = v < 0.003 ? 'hidden' : 'visible';
-        el.style.transform = `translate3d(0, ${(-ph * 60).toFixed(1)}px, 0)`;
-        el.style.pointerEvents = v > 0.6 ? 'auto' : 'none';
+        const opacity = v.toFixed(3);
+        const visibility = v < 0.003 ? 'hidden' : 'visible';
+        const transform = `translate3d(0, ${(-ph * 60).toFixed(1)}px, 0)`;
+        const pointerEvents = v > 0.6 ? 'auto' : 'none';
+        let previous = previousValues.get(el);
+        if (!previous) {
+          previous = {};
+          previousValues.set(el, previous);
+        }
+        if (previous.opacity !== opacity) {
+          el.style.opacity = opacity;
+          previous.opacity = opacity;
+        }
+        if (previous.visibility !== visibility) {
+          el.style.visibility = visibility;
+          previous.visibility = visibility;
+        }
+        if (previous.transform !== transform) {
+          el.style.transform = transform;
+          previous.transform = transform;
+        }
+        if (previous.pointerEvents !== pointerEvents) {
+          el.style.pointerEvents = pointerEvents;
+          previous.pointerEvents = pointerEvents;
+        }
         const key = el.dataset.key;
         const on = v > 0.55;
         if (onRef.current[key] !== on) {

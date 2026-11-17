@@ -15,6 +15,7 @@ export default function Towers() {
   const edges = useRef([]);
   const edgeGeo = useMemo(() => new THREE.EdgesGeometry(new THREE.BoxGeometry(0.95, 1, 0.95)), []);
   const v = useMemo(() => new THREE.Vector3(), []);
+  const labelValues = useRef(STATS.map(() => ({ x: NaN, y: NaN, opacity: NaN })));
   const xs = store.mobile ? X.map((x) => x * 0.62) : X;
 
   useFrame((s) => {
@@ -46,8 +47,17 @@ export default function Towers() {
         v.set(xs[i], FLOOR + h + 0.55, L.towers).project(s.camera);
         const x = (v.x * 0.5 + 0.5) * size.width;
         const y = (-v.y * 0.5 + 0.5) * size.height;
-        el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -100%)`;
-        el.style.opacity = v.z > 1 ? '0' : String(sv * clamp(k * 1.4));
+        const previous = labelValues.current[i];
+        if (!Number.isFinite(previous.x) || Math.abs(x - previous.x) > 0.1 || Math.abs(y - previous.y) > 0.1) {
+          el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -100%)`;
+          previous.x = x;
+          previous.y = y;
+        }
+        const opacity = v.z > 1 ? 0 : sv * clamp(k * 1.4);
+        if (!Number.isFinite(previous.opacity) || Math.abs(opacity - previous.opacity) > 0.001) {
+          el.style.opacity = String(opacity);
+          previous.opacity = opacity;
+        }
         const num = el.querySelector('.tw-num');
         const val = (st.value * k).toFixed(st.decimals);
         if (num && num.textContent !== val) num.textContent = val;

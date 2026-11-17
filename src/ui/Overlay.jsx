@@ -1,9 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { store } from '../store.js';
 import { vis, phase, centerU } from '../timeline.js';
 import { scrollToU } from '../lib/scroll.js';
 import { GROUPS, SKILLS, PROJECTS, STATS, JOURNEY, CERTS } from '../content.js';
 import Contact from './Contact.jsx';
+
+const stagger = (index, base, step) => ({
+  '--stagger-index': index,
+  '--stagger-base': `${base}s`,
+  '--stagger-step': `${step}s`,
+});
 
 function Words({ text, base = 0 }) {
   return text.split(' ').map((w, i) => {
@@ -12,7 +18,7 @@ function Words({ text, base = 0 }) {
     return (
       <React.Fragment key={i}>
         <span className="wd">
-          <span className={`wd-in ${em ? 'em' : ''}`} style={{ transitionDelay: `${base + i * 0.035}s` }}>
+          <span className={`wd-in ${em ? 'em' : ''}`} style={stagger(i, base, 0.035)}>
             {t}
           </span>
         </span>{' '}
@@ -25,7 +31,8 @@ export default function Overlay({ ready }) {
   const tl = store.tl;
   const I = tl.index;
   const panels = useRef([]);
-  const [group, setGroup] = useState(null);
+  const group = useRef(null);
+  const groupButtons = useRef({});
   const onRef = useRef({});
 
   useEffect(() => {
@@ -73,7 +80,10 @@ export default function Overlay({ ready }) {
 
   const pickGroup = (g) => {
     store.skillGroup = g;
-    setGroup(g);
+    group.current = g;
+    Object.entries(groupButtons.current).forEach(([name, button]) => {
+      if (button) button.classList.toggle('on', name === g);
+    });
   };
 
   return (
@@ -131,7 +141,7 @@ export default function Overlay({ ready }) {
             <p className="wc-desc">{p.desc}</p>
             <ul className="chips">
               {p.stack.map((s, k) => (
-                <li key={s} style={{ transitionDelay: `${0.25 + k * 0.05}s` }}>
+                <li key={s} style={stagger(k, 0.25, 0.05)}>
                   {s}
                 </li>
               ))}
@@ -159,11 +169,12 @@ export default function Overlay({ ready }) {
           </div>
           <ul className="groups" onMouseLeave={() => pickGroup(null)}>
             {Object.entries(GROUPS).map(([g, ws], i) => (
-              <li key={g} style={{ transitionDelay: `${0.15 + i * 0.06}s` }}>
+              <li key={g} style={stagger(i, 0.15, 0.06)}>
                 <button
-                  className={`group ${group === g ? 'on' : ''}`}
+                  ref={(el) => (groupButtons.current[g] = el)}
+                  className="group"
                   onMouseEnter={() => pickGroup(g)}
-                  onClick={() => pickGroup(group === g ? null : g)}
+                  onClick={() => pickGroup(group.current === g ? null : g)}
                 >
                   <span className="mono dim gi">0{i + 1}</span>
                   <span className="gname">{g}</span>
@@ -232,7 +243,7 @@ export default function Overlay({ ready }) {
             <div className="jy-year">
               {j.year.split('').map((c, k) => (
                 <span key={k} className="jy-d">
-                  <span style={{ transitionDelay: `${k * 0.06}s` }}>{c}</span>
+                  <span style={stagger(k, 0, 0.06)}>{c}</span>
                 </span>
               ))}
             </div>
@@ -263,7 +274,7 @@ export default function Overlay({ ready }) {
           </div>
           <div className="cert-grid">
             {CERTS.map((cert, i) => (
-              <article className="cert-card" key={cert.title} style={{ transitionDelay: `${0.08 + i * 0.07}s` }}>
+              <article className="cert-card" key={cert.title} style={stagger(i, 0.08, 0.07)}>
                 <div className="cert-card-main">
                   <div className="cert-card-head">
                     <span className="cert-mark" aria-hidden="true">{cert.mark}</span>

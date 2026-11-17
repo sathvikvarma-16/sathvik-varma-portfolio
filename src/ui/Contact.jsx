@@ -29,13 +29,40 @@ function Magnetic({ className, label, href, children, download = false }) {
   const ref = useRef(null);
   const bounds = useRef(null);
   const pointer = useRef({ x: 0, y: 0 });
+  const position = useRef({ x: 0, y: 0 });
   const raf = useRef(null);
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    const onBlur = () => reset();
+    window.addEventListener('blur', onBlur);
+    return () => {
+      window.removeEventListener('blur', onBlur);
       if (raf.current !== null) cancelAnimationFrame(raf.current);
-    },
-    []
-  );
+    };
+  }, []);
+  const schedule = () => {
+    if (raf.current === null) raf.current = requestAnimationFrame(tick);
+  };
+  const tick = (now) => {
+    raf.current = null;
+    const r = bounds.current;
+    const targetX = r ? (pointer.current.x - r.left - r.width / 2) * 0.35 : 0;
+    const targetY = r ? (pointer.current.y - r.top - r.height / 2) * 0.35 : 0;
+    const dt = Math.min((now - (tick.lastTime || now - 1000 / 60)) / 1000, 1 / 30);
+    tick.lastTime = now;
+    const alpha = 1 - Math.exp(-12 * dt);
+    position.current.x += (targetX - position.current.x) * alpha;
+    position.current.y += (targetY - position.current.y) * alpha;
+    if (ref.current) {
+      ref.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0)`;
+    }
+    if (Math.abs(targetX - position.current.x) > 0.1 || Math.abs(targetY - position.current.y) > 0.1) {
+      schedule();
+    } else {
+      position.current.x = targetX;
+      position.current.y = targetY;
+      if (ref.current) ref.current.style.transform = targetX || targetY ? `translate3d(${targetX}px, ${targetY}px, 0)` : '';
+    }
+  };
   const onEnter = (e) => {
     if (e.pointerType !== 'mouse') return;
     bounds.current = ref.current?.getBoundingClientRect() ?? null;
@@ -44,21 +71,11 @@ function Magnetic({ className, label, href, children, download = false }) {
     if (e.pointerType !== 'mouse' || !bounds.current) return;
     pointer.current.x = e.clientX;
     pointer.current.y = e.clientY;
-    if (raf.current !== null) return;
-    raf.current = requestAnimationFrame(() => {
-      raf.current = null;
-      const r = bounds.current;
-      if (!r || !ref.current) return;
-      const x = (pointer.current.x - r.left - r.width / 2) * 0.35;
-      const y = (pointer.current.y - r.top - r.height / 2) * 0.35;
-      ref.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-    });
+    schedule();
   };
   const reset = () => {
-    if (raf.current !== null) cancelAnimationFrame(raf.current);
-    raf.current = null;
     bounds.current = null;
-    if (ref.current) ref.current.style.transform = '';
+    schedule();
   };
   const external = href.startsWith('http');
   return (

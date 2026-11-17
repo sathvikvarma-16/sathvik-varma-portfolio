@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
-import portraitAsset from '../assets/sathvik-portrait.png';
+import portraitAsset from '../assets/sathvik-portrait.webp';
 import { PORTRAIT_URL } from '../content.js';
 import { store, clamp, lerp, ease, easeOut } from '../store.js';
 import { sampleWord, measure, glowTexture } from './textures.js';
@@ -253,7 +253,7 @@ export default function Hero() {
     if (!data) return;
     const tl = store.tl;
     if (!store.introDone) {
-      store.introT += dt * (store.reduced ? 3 : 1);
+      store.introT += Math.min(dt, 1 / 30) * (store.reduced ? 3 : 1);
       if (store.introT > 6.7) {
         store.introDone = true;
         store.onIntroDone?.();

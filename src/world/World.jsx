@@ -21,8 +21,8 @@ function CameraRig() {
   const Lk = useMemo(() => new THREE.Vector3(), []);
   const roll = useMemo(() => ({ v: 0 }), []);
   useFrame((_, dt) => {
-    const d = dt;
-    store.off += (store.target - store.off) * (1 - Math.exp(-d * 12));
+    const d = Math.min(dt, 1 / 30);
+    store.off += (store.target - store.off) * (1 - Math.exp(-d * 10.5));
     store.smouse.x += (store.mouse.x - store.smouse.x) * (1 - Math.exp(-d * 10));
     store.smouse.y += (store.mouse.y - store.smouse.y) * (1 - Math.exp(-d * 10));
     const info = sample(store.tl, store.off, P, Lk);

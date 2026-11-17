@@ -55,6 +55,11 @@ em {
   position: fixed;
   inset: 0;
   z-index: 0;
+  opacity: 0;
+  transition: opacity 1s var(--ease);
+}
+.stage.ready {
+  opacity: 1;
 }
 .stage canvas {
   display: block;
@@ -84,6 +89,9 @@ html.has-cursor * {
   pointer-events: none;
   border-radius: 50%;
   mix-blend-mode: difference;
+}
+.cursor-dot.is-moving,
+.cursor-ring.is-moving {
   will-change: transform;
 }
 .cursor-dot {
@@ -98,7 +106,7 @@ html.has-cursor * {
   margin: -20px 0 0 -20px;
   border: 1px solid rgba(255, 255, 255, 0.7);
   scale: 1;
-  transition: scale 0.25s var(--ease), background 0.2s, border-color 0.2s;
+  transition: scale 0.25s var(--ease), background 0.2s var(--ease), border-color 0.2s var(--ease);
   transform-origin: center;
 }
 .cursor-ring.is-hover {
@@ -294,7 +302,7 @@ html.has-cursor * {
   text-decoration: none;
   opacity: 0;
   transform: translateY(10px);
-  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease), color 0.3s;
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease), color 0.3s var(--ease);
 }
 .project-link:hover {
   color: #fff;
@@ -380,7 +388,7 @@ html.has-cursor * {
   font-size: clamp(1.25rem, 2vw, 1.9rem);
   letter-spacing: -0.03em;
   color: #8c8c92;
-  transition: color 0.4s, transform 0.6s var(--ease);
+  transition: color 0.4s var(--ease), transform 0.6s var(--ease);
 }
 .group.on .gname {
   color: #fff;
@@ -405,7 +413,7 @@ html.has-cursor * {
   letter-spacing: -0.01em;
   color: #dcdce0;
   text-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
-  transition: color 0.3s, text-shadow 0.3s;
+  transition: color 0.3s var(--ease), text-shadow 0.3s var(--ease);
 }
 .sk-label.hl {
   color: #fff;
@@ -594,7 +602,7 @@ html.has-cursor * {
   border-radius: 14px;
   background: linear-gradient(145deg, rgba(22, 22, 25, 0.97), rgba(11, 11, 13, 0.97));
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.32);
-  transition: transform 0.65s var(--ease), border-color 0.5s, background-color 0.5s, opacity 0.8s var(--ease);
+  transition: transform 0.65s var(--ease), border-color 0.5s var(--ease), background-color 0.5s var(--ease), opacity 0.8s var(--ease);
   opacity: 0;
   transform: translateY(14px);
 }
@@ -676,7 +684,7 @@ html.has-cursor * {
   border-radius: 8px;
   background: linear-gradient(155deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.015));
   box-shadow: inset 0 0 22px rgba(255, 255, 255, 0.025);
-  transition: transform 0.65s var(--ease), border-color 0.5s;
+  transition: transform 0.65s var(--ease), border-color 0.5s var(--ease);
 }
 .cert-card:hover .cert-card-art {
   transform: rotate(3deg) scale(1.04);
@@ -792,7 +800,7 @@ html.has-cursor * {
   background: rgba(10, 10, 11, 0.35);
   backdrop-filter: blur(5px);
   color: #e8e8ea;
-  transition: background 0.45s var(--ease), color 0.45s, border-color 0.45s, transform 0.5s var(--ease);
+  transition: background 0.45s var(--ease), color 0.45s var(--ease), border-color 0.45s var(--ease), transform 0.5s var(--ease);
   text-decoration: none;
 }
 .soc svg {
@@ -831,7 +839,7 @@ html.has-cursor * {
   border-radius: 50%;
   background: #f1f1f3;
   color: #0a0a0b;
-  transition: background 0.5s, color 0.5s;
+  transition: background 0.5s var(--ease), color 0.5s var(--ease);
 }
 .resume-ic svg {
   width: 20px;
@@ -842,7 +850,7 @@ html.has-cursor * {
   z-index: 1;
   min-width: 6.4em;
   text-align: left;
-  transition: color 0.5s;
+  transition: color 0.5s var(--ease);
 }
 .resume-fill {
   position: absolute;
@@ -889,6 +897,14 @@ html.has-cursor * {
   font-size: 0.95rem;
   line-height: 1.55;
   letter-spacing: 0;
+}
+
+.wd-in,
+.chips li,
+.groups li,
+.jy-d > span,
+.cert-card {
+  transition-delay: calc(var(--stagger-base, 0s) + var(--stagger-index, 0) * var(--stagger-step, 0s));
 }
 
 /* ---------- mobile ---------- */

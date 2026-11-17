@@ -39,7 +39,16 @@ export default function App() {
       store.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
       store.mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
     };
+    const clearPointer = () => {
+      store.mouse.x = 0;
+      store.mouse.y = 0;
+      store.hasPointer = false;
+    };
     if (hasFinePointer) window.addEventListener('pointermove', move, { passive: true });
+    if (hasFinePointer) {
+      window.addEventListener('pointerleave', clearPointer, { passive: true });
+      window.addEventListener('blur', clearPointer);
+    }
     const onVisibilityChange = () => setPageVisible(!document.hidden);
     document.addEventListener('visibilitychange', onVisibilityChange);
     let active = true;
@@ -73,7 +82,11 @@ export default function App() {
       active = false;
       window.clearTimeout(fontTimer);
       motionPreference.removeEventListener('change', onMotionChange);
-      if (hasFinePointer) window.removeEventListener('pointermove', move);
+      if (hasFinePointer) {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerleave', clearPointer);
+        window.removeEventListener('blur', clearPointer);
+      }
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('resize', onResize);
       store.onIntroDone = null;
@@ -83,7 +96,7 @@ export default function App() {
 
   return (
     <>
-      <div className="stage">
+      <div className={`stage ${fonts ? 'ready' : ''}`}>
         {fonts && (
           <Canvas
             key={mobile ? 'mobile' : 'desktop'}

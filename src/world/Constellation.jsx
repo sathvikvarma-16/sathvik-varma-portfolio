@@ -86,8 +86,10 @@ export default function Constellation() {
   const v = useMemo(() => new THREE.Vector3(), []);
   const lastGroup = useRef('init');
   const labelsVisible = useRef(false);
+  const labelValues = useRef(SKILLS.map(() => ({ x: NaN, y: NaN, scale: NaN, opacity: NaN })));
 
   useFrame((s, dt) => {
+    dt = Math.min(dt, 1 / 30);
     const d = Math.abs(s.camera.position.z - L.skills.z);
     root.current.visible = d < 55;
     if (!root.current.visible) return;
@@ -159,8 +161,11 @@ export default function Constellation() {
     const w = size.width, h = size.height;
     if (sv <= 0.01) {
       if (labelsVisible.current) {
-        labels.forEach((el) => {
-          if (el) el.style.opacity = '0';
+        labels.forEach((el, i) => {
+          if (el && labelValues.current[i].opacity !== 0) {
+            el.style.opacity = '0';
+            labelValues.current[i].opacity = 0;
+          }
         });
         labelsVisible.current = false;
       }
@@ -173,7 +178,10 @@ export default function Constellation() {
         const dist = v.distanceTo(s.camera.position);
         v.project(s.camera);
         if (v.z > 1) {
-          el.style.opacity = '0';
+          if (labelValues.current[i].opacity !== 0) {
+            el.style.opacity = '0';
+            labelValues.current[i].opacity = 0;
+          }
           return;
         }
         const x = (v.x * 0.5 + 0.5) * w;
@@ -181,8 +189,25 @@ export default function Constellation() {
         const depth = clamp((18 - dist) / 8, 0, 1); // nearer = brighter
         const on = grp && SKILLS[i].g === grp;
         const o = sv * (grp ? (on ? 1 : 0.12) : 0.25 + depth * 0.75);
-        el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -140%) scale(${0.75 + depth * 0.45 + (on ? 0.2 : 0)})`;
-        el.style.opacity = o.toFixed(3);
+        const scale = 0.75 + depth * 0.45 + (on ? 0.2 : 0);
+        const previous = labelValues.current[i];
+        if (
+          !Number.isFinite(previous.x) ||
+          !Number.isFinite(previous.y) ||
+          !Number.isFinite(previous.scale) ||
+          Math.abs(x - previous.x) > 0.1 ||
+          Math.abs(y - previous.y) > 0.1 ||
+          Math.abs(scale - previous.scale) > 0.001
+        ) {
+          el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -140%) scale(${scale})`;
+          previous.x = x;
+          previous.y = y;
+          previous.scale = scale;
+        }
+        if (!Number.isFinite(previous.opacity) || Math.abs(o - previous.opacity) > 0.001) {
+          el.style.opacity = o.toFixed(3);
+          previous.opacity = o;
+        }
       });
     }
   });

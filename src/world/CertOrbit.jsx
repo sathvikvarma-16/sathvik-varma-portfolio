@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { L, local } from '../timeline.js';
@@ -59,13 +59,14 @@ export default function CertOrbit() {
   const root = useRef();
   const ring = useRef();
   const cards = useRef([]);
-  const [hover, setHover] = useState(-1);
+  const hover = useRef(-1);
   const texes = useMemo(() => CERTS.map(({ issuer, title }, i) => cardTexture(issuer, title, i)), []);
   const R = store.mobile ? 2.7 : 4.3;
   const tmp = useMemo(() => new THREE.Vector3(), []);
   const lift = useRef(CERTS.map(() => 0));
 
   useFrame((s, dt) => {
+    dt = Math.min(dt, 1 / 30);
     const d = Math.abs(s.camera.position.z - L.certs.z);
     root.current.visible = d < 55;
     if (!root.current.visible) return;
@@ -76,7 +77,7 @@ export default function CertOrbit() {
     cards.current.forEach((m, i) => {
       if (!m) return;
       const a = base + (i / CERTS.length) * Math.PI * 2;
-      lift.current[i] += ((hover === i ? 1 : 0) - lift.current[i]) * Math.min(1, dt * 8);
+      lift.current[i] += ((hover.current === i ? 1 : 0) - lift.current[i]) * (1 - Math.exp(-dt * 8.625));
       const L_ = lift.current[i];
       const r = R + L_ * 0.6;
       m.position.set(Math.cos(a) * r, Math.sin(a) * 0.55 + L_ * 0.35, Math.sin(a) * r);
@@ -97,16 +98,16 @@ export default function CertOrbit() {
           ref={(el) => (cards.current[i] = el)}
           onPointerOver={(e) => {
             e.stopPropagation();
-            setHover(i);
+            hover.current = i;
             store.hover3d = true;
           }}
           onPointerOut={() => {
-            setHover(-1);
+            hover.current = -1;
             store.hover3d = false;
           }}
           onClick={(e) => {
             e.stopPropagation();
-            setHover((h) => (h === i ? -1 : i));
+            hover.current = hover.current === i ? -1 : i;
           }}
         >
           <planeGeometry args={[1.62, 2.27]} />
